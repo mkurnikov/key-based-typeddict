@@ -2,5 +2,5 @@
 __pycache__/
 out/
 /test_sqlite.py
-/django
 .idea/
+/django
