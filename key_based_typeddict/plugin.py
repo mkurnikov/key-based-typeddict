@@ -101,7 +101,7 @@ def add_key_based_typeddict_to_global_symboltable(ctx: DynamicClassDefContext) -
                                                        items=fields,
                                                        types=types,
                                                        required_keys=required_fields)
-    allow_extra = ctx.call.args[2].fullname == 'builtins.True' if len(ctx.call.args) > 2 else False
+    allow_extra = api.parse_bool(ctx.call.args[2]) if len(ctx.call.args) > 2 else False
     info.typeddict_type.allow_extra = allow_extra
     api.add_symbol_table_node(ctx.name,
                               SymbolTableNode(GDEF, info))
@@ -110,7 +110,7 @@ def add_key_based_typeddict_to_global_symboltable(ctx: DynamicClassDefContext) -
 class KeyBasedTypedDictPlugin(Plugin):
     def get_dynamic_class_hook(self, fullname: str
                                ) -> Optional[Callable[[DynamicClassDefContext], None]]:
-        if fullname.endswith('typeddict2.KeyBasedTypedDict'):
+        if fullname == 'key_based_typeddict.core.KeyBasedTypedDict':
             return add_key_based_typeddict_to_global_symboltable
         return None
 

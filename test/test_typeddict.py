@@ -13,7 +13,9 @@ MYPY_INI_PATH = ROOT_DIR / 'test' / 'plugins.ini'
 
 
 class KeyBasedTypedDictTestSuite(DataSuite):
-    files = []
+    files = [
+        'check-key-based-typeddict.test'
+    ]
     data_prefix = str(TEST_DATA_DIR)
 
     def run_case(self, testcase: DataDrivenTestCase) -> None:
