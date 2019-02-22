@@ -1,6 +1,6 @@
 import dataclasses
 import sys
-from typing import Mapping, Union, _type_check  # type: ignore
+import typing
 
 from mypy_extensions import _check_fails, _dict_new  # type: ignore
 
@@ -18,11 +18,11 @@ def _key_typeddict_new(cls, _typename, _fields=None, **kwargs):
     elif kwargs:
         raise TypeError("TypedDict takes either a dict or keyword arguments,"
                         " but not both")
-    return _KeyBasedTypedDictMeta(_typename, (), {'__annotations__': dict(_fields),
+    return _KeyTypedDictMeta(_typename, (), {'__annotations__': dict(_fields),
                                                   '__total__': total})
 
 
-class _KeyBasedTypedDictMeta(type):
+class _KeyTypedDictMeta(type):
     def __new__(cls, name, bases, ns, total=True, allow_extra=False):
         # Create new typed dict class object.
         # This method is called directly when TypedDict is subclassed,
@@ -30,16 +30,16 @@ class _KeyBasedTypedDictMeta(type):
         # TypedDict supports all three syntaxes described in its docstring.
         # Subclasses and instances of TypedDict return actual dictionaries
         # via _dict_new.
-        ns['__new__'] = _key_typeddict_new if name == 'KeyBasedTypedDict' else _dict_new
-        tp_dict = super(_KeyBasedTypedDictMeta, cls).__new__(cls, name, (dict,), ns)
+        ns['__new__'] = _key_typeddict_new if name == 'KeyTypedDict' else _dict_new
+        tp_dict = super(_KeyTypedDictMeta, cls).__new__(cls, name, (dict,), ns)
         try:
             # Setting correct module is necessary to make typed dict classes pickleable.
             tp_dict.__module__ = sys._getframe(2).f_globals.get('__name__', '__main__')
         except (AttributeError, ValueError):
             pass
         anns = ns.get('__annotations__', {})
-        msg = "KeyBasedTypedDict('Name', {f0: t0, f1: t1, ...}); each t must be a type"
-        anns = {n: _type_check(tp, msg) for n, tp in anns.items()}
+        msg = "KeyTypedDict('Name', {f0: t0, f1: t1, ...}); each t must be a type"
+        anns = {n: typing._type_check(tp, msg) for n, tp in anns.items()}
         for base in bases:
             anns.update(base.__dict__.get('__annotations__', {}))
         tp_dict.__annotations__ = anns
@@ -52,5 +52,5 @@ class _KeyBasedTypedDictMeta(type):
     __instancecheck__ = __subclasscheck__ = _check_fails
 
 
-KeyBasedTypedDict = _KeyBasedTypedDictMeta('KeyBasedTypedDict', (dict,), {})
-KeyBasedTypedDict.__module__ = __name__
+KeyTypedDict = _KeyTypedDictMeta('KeyTypedDict', (dict,), {})
+KeyTypedDict.__module__ = __name__

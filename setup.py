@@ -1,23 +1,25 @@
-import os
+import sys
 from distutils.core import setup
 
+from setuptools import find_packages
 
-def find_stubs(package):
-    stubs = []
-    for root, dirs, files in os.walk(package):
-        for file in files:
-            path = os.path.join(root, file).replace(package + os.sep, '', 1)
-            stubs.append(path)
-    return {package: stubs}
 
+dependencies = [
+    'mypy>=0.670'
+]
+if sys.version_info[:2] < (3, 7):
+    # dataclasses port for 3.6
+    dependencies += ['dataclasses']
 
 setup(
-    name="key-based-typeddict",
-    url="https://github.com/mkurnikov/key-based-typeddict.git",
+    name="key-typeddict",
+    version="0.1.0",
+    url="https://github.com/mkurnikov/key-typeddict",
     author="Maksim Kurnikov",
     author_email="maxim.kurnikov@gmail.com",
-    version="0.1.0",
-    license='BSD',
-    packages=['key_based_typeddict']
-    # package_data=find_stubs('django-stubs')
+    license='MIT',
+    install_requires=dependencies,
+    packages=['key_typeddict'],
+    package_data={'key_typeddict': ['py.typed', 'core.pyi']},
+    zip_safe=False
 )

@@ -1,22 +1,21 @@
 from collections import OrderedDict
-from typing import Optional, Callable, List, Tuple, Set, cast
+from typing import Callable, List, Optional, Set, Tuple, cast
 
-from mypy import messages
+from mypy import message_registry
 from mypy.checkexpr import ExpressionChecker
 from mypy.exprtotype import expr_to_unanalyzed_type
-from mypy.nodes import SymbolTableNode, GDEF, DictExpr, StrExpr, CallExpr, NameExpr, \
-    Expression, Context
+from mypy.nodes import CallExpr, Context, DictExpr, Expression, GDEF, NameExpr, StrExpr, SymbolTableNode
 from mypy.plugin import DynamicClassDefContext, Plugin
 from mypy.semanal import SemanticAnalyzerPass2
 from mypy.semanal_typeddict import TypedDictAnalyzer
-from mypy.types import Type, TypedDictType, AnyType, TypeOfAny, Instance
+from mypy.types import AnyType, Instance, Type, TypeOfAny, TypedDictType
 
 
 class UnsupportedKeyTypeError(ValueError):
     pass
 
 
-def parse_key_based_typeddict_fields(attrs_expr: DictExpr) -> Tuple[List[str], List[Type], Set[str]]:
+def parse_key_typeddict_fields(attrs_expr: DictExpr) -> Tuple[List[str], List[Type], Set[str]]:
     fields = []
     types = []
     required_fields = set()
@@ -59,7 +58,7 @@ def check_typeddict_call_with_kwargs(self,
             item_value = kwargs[item_name]
             self.chk.check_simple_assignment(
                 lvalue_type=item_expected_type, rvalue=item_value, context=item_value,
-                msg=messages.INCOMPATIBLE_TYPES,
+                msg=message_registry.INCOMPATIBLE_TYPES,
                 lvalue_name='TypedDict item "{}"'.format(item_name),
                 rvalue_name='expression')
 
@@ -87,13 +86,13 @@ ExpressionChecker.check_typeddict_call_with_kwargs = check_typeddict_call_with_k
 TypedDictType.copy_modified = copy_modified
 
 
-def add_key_based_typeddict_to_global_symboltable(ctx: DynamicClassDefContext) -> None:
+def add_key_typeddict_to_global_symboltable(ctx: DynamicClassDefContext) -> None:
     api = cast(SemanticAnalyzerPass2, ctx.api)
     typeddict_analyzer = TypedDictAnalyzer(options=api.options,
                                            api=api,
                                            msg=api.msg)
     try:
-        fields, types, required_fields = parse_key_based_typeddict_fields(ctx.call.args[1])
+        fields, types, required_fields = parse_key_typeddict_fields(ctx.call.args[1])
     except UnsupportedKeyTypeError as error:
         api.fail(f'Unsupported key type {error.args[0]}', ctx=ctx.call)
 
@@ -107,13 +106,13 @@ def add_key_based_typeddict_to_global_symboltable(ctx: DynamicClassDefContext) -
                               SymbolTableNode(GDEF, info))
 
 
-class KeyBasedTypedDictPlugin(Plugin):
+class KeyTypedDictPlugin(Plugin):
     def get_dynamic_class_hook(self, fullname: str
                                ) -> Optional[Callable[[DynamicClassDefContext], None]]:
-        if fullname == 'key_based_typeddict.core.KeyBasedTypedDict':
-            return add_key_based_typeddict_to_global_symboltable
+        if fullname == 'key_typeddict.core.KeyTypedDict':
+            return add_key_typeddict_to_global_symboltable
         return None
 
 
 def plugin(version):
-    return KeyBasedTypedDictPlugin
+    return KeyTypedDictPlugin

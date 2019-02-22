@@ -1,0 +1,37 @@
+[CASE key_with_required_false_could_be_absent_from_dict]
+from key_typeddict.core import KeyTypedDict, Key
+
+MyTypedDict = KeyTypedDict('MyTypedDict', {
+    'name': str,
+    Key('profile', required=False): str
+})
+
+def func(mydict: MyTypedDict):
+    pass
+func({'name': 'hello'})
+[/CASE]
+
+[CASE key_is_required_true_by_default]
+from key_typeddict.core import KeyTypedDict, Key
+
+MyTypedDict = KeyTypedDict('MyTypedDict', {
+    'name': str,
+    Key('profile'): str
+})
+
+def func(mydict: MyTypedDict):
+    pass
+func({'name': 'hello'})
+[/CASE]
+
+[CASE allow_extra_permits_non_specified_keys]
+from key_typeddict.core import KeyTypedDict, Key
+
+MyTypedDict = KeyTypedDict('MyTypedDict', {
+    'name': str
+}, allow_extra=True)
+
+def func(mydict: MyTypedDict):
+    pass
+func({'name': 'hello', 'extra': True})
+[/CASE]
