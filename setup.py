@@ -14,6 +14,7 @@ if sys.version_info[:2] < (3, 7):
 setup(
     name="key-typeddict",
     version="0.1.0",
+    description='mypy_extensions.TypedDict with some additional features',
     url="https://github.com/mkurnikov/key-typeddict",
     author="Maksim Kurnikov",
     author_email="maxim.kurnikov@gmail.com",
